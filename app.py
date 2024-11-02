@@ -1,3 +1,5 @@
+import json
+
 import pyxel
 
 
@@ -5,46 +7,35 @@ class App:
     def __init__(self):
 
         pyxel.init(160, 120, title="Fruits Catch")
-        # pyxel.mouse(True)
+        pyxel.load("assets/my_resource.pyxres")  # リソースファイルの読み込み
 
-        # 音声データの作成
-        pyxel.sound(0).set(  # 果物ゲット時の効果音
+        with open(f"assets/music.json", "rt", encoding="utf-8") as fin:
+            self.music = json.loads(fin.read())
+
+        # BGMを再生（ループ設定）
+        # 再生
+        if pyxel.play_pos(0) is None:
+            for ch, sound in enumerate(self.music):
+                pyxel.sound(ch).set(*sound)
+                pyxel.play(ch, ch, loop=True)
+
+        pyxel.sound(3).set(  # 果物ゲット時の効果音
             "e3a3", "t", "7", "s", 30  # note  # tone  # volume  # effect  # speed
         )
 
-        pyxel.sound(1).set(  # BGM
-            "c3e3g3c4g3c4g3e3",  # note
-            "t",  # tone
-            "4",  # volume
-            "n",  # effect
-            20,  # speed
-        )
+        pyxel.sound(4).set("c3e3g3c4", "t", "7", "s", 20)  # 星取得時の効果音
 
-        # BGMを再生（ループ設定）
-        pyxel.play(0, 1, loop=True)
+        # フルーツの種類を定義
+        self.FRUIT_TYPES = {
+            "strawberry": {"score": 30, "img_u": 0, "img_v": 0},
+            "apple": {"score": 50, "img_u": 8, "img_v": 0},
+            "banana": {"score": 20, "img_u": 0, "img_v": 8},
+            "star": {"score": 0, "img_u": 8, "img_v": 8},  # 星を追加
+        }
 
         self.init_set()
 
-        self.GAME_DURATION = 30 * 10
-
-        # 色ごとの点数を辞書で定義
-        self.color_scores = {
-            1: 10,  # 紺色
-            2: 20,  # 紫
-            3: 30,  # 緑
-            4: 40,  # 茶色
-            5: 50,  # 濃い青
-            6: 60,  # 水色
-            7: 70,  # 白
-            8: 80,  # 赤
-            9: 90,  # オレンジ
-            10: 100,  # 黄色
-            11: 110,  # 緑
-            12: 120,  # 青
-            13: 130,  # グレー
-            14: 140,  # ピンク
-            15: 150,  # ベージュ
-        }
+        self.GAME_DURATION = 30 * 20
         self.add_fruit(2)
         pyxel.run(self.update, self.draw)
 
@@ -65,23 +56,35 @@ class App:
         import random
 
         for _ in range(num):
+            # フルーツの種類をランダムに選択（星は出現確率を低くする）
+            fruit_type = random.choices(
+                list(self.FRUIT_TYPES.keys()),
+                weights=[30, 30, 30, 10],  # apple, strawberry, banana, starの出現確率
+                k=1,
+            )[0]
+
             self.fruits.append(
                 {
                     "x": random.randint(0, 160),
                     "y": 0,
                     "speed": random.uniform(1, 3),
-                    "color": random.randint(
-                        1, 15
-                    ),  # 色を0-15からランダムに選択（0は黒なので除外）
+                    "type": fruit_type,
                 }
             )
 
     def update(self):
         # ゲームオーバー時は更新しない
         if self.game_over:
-            pyxel.stop(0)  # BGMを停止
-            # if pyxel.btn(pyxel.MOUSE_BUTTON_LEFT):
-            #     self.init_set()
+            pyxel.stop(1)  # BGMを停止
+            # マウスクリックの座標がRETRYボタンの範囲内かチェック
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                retry_x = 80 - 28  # RETRYボタンのx座標
+                retry_y = 60 + 12  # RETRYボタンのy座標
+                if (
+                    retry_x <= pyxel.mouse_x <= retry_x + 40
+                    and retry_y <= pyxel.mouse_y <= retry_y + 10
+                ):
+                    self.init_set()  # ゲームをリセット
             return
 
         # 残り時間の計算
@@ -123,13 +126,16 @@ class App:
         for fruit in self.fruits[:]:
             fruit["y"] += fruit["speed"]
 
-            # プレイヤーと果物の当たり判定
             if self.check_collision(fruit):
-                self.score += self.color_scores[fruit["color"]]  # 色に応じた点数を加算
-                pyxel.play(1, 0)  # 効果音を再生（チャンネル1、サウンド0）
+                if fruit["type"] == "star":
+                    self.GAME_DURATION += 30 * 5  # 5秒追加
+                    pyxel.play(0, 4)  # 星用の効果音
+                else:
+                    self.score += self.FRUIT_TYPES[fruit["type"]]["score"]
+                    pyxel.play(0, 3)  # 通常の効果音
+
                 self.fruits.remove(fruit)
                 self.add_fruit()
-            # 画面外に出た場合
             elif fruit["y"] > 120:
                 self.fruits.remove(fruit)
                 self.add_fruit()
@@ -144,10 +150,23 @@ class App:
 
     def draw(self):
         pyxel.cls(0)
-        # プレイヤーと果物の描画（既存のコード）
+
+        # プレイヤーの描画
         pyxel.circ(self.player_x, self.player_y, 8, 7)
+
+        # フルーツの描画
         for fruit in self.fruits:
-            pyxel.circ(fruit["x"], fruit["y"], 4, fruit["color"])
+            fruit_data = self.FRUIT_TYPES[fruit["type"]]
+            pyxel.blt(
+                fruit["x"] - 4,  # 中心座標に調整
+                fruit["y"] - 4,
+                0,  # イメージバンク0
+                fruit_data["img_u"],
+                fruit_data["img_v"],
+                8,  # 幅
+                8,  # 高さ
+                0,  # 透明色（黒）
+            )
 
         # 残り時間の表示（左上）
         elapsed = pyxel.frame_count - self.start_time
@@ -165,6 +184,7 @@ class App:
             center_y = 60 - 8
             pyxel.text(center_x, center_y, "GAME OVER", 8)
             pyxel.text(center_x - 8, center_y + 10, "SCORE:" + str(self.score), 7)
+            pyxel.text(center_x - 8, center_y + 20, "RETRY", 7)
 
 
 App()
