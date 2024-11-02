@@ -132,7 +132,7 @@ class App:
         # タッチ位置とフルーツの距離を計算
         dx = fruit["x"] - touch_x
         dy = fruit["y"] - touch_y
-        return (dx * dx + dy * dy) < 64  # 8 * 8 (フルーツのサイズに応じて調整)
+        return (dx * dx + dy * dy) < 90  # 8 * 8 (フルーツのサイズに応じて調整)
 
     def draw(self):
         pyxel.cls(0)
@@ -150,6 +150,7 @@ class App:
                 8,  # 幅
                 8,  # 高さ
                 0,  # 透明色（黒）
+                scale=3,
             )
 
         # 残り時間の表示（左上）
