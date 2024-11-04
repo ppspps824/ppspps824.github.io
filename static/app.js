@@ -3,11 +3,11 @@ const gameSites = [
     ["https://ppspps824.github.io/apps/fruits_catch/index.html", "fruits_catch"],
 ];
 
-async function loadGameSites() {
+function loadGameSites() {
     const container = document.getElementById("game-list");
 
     for (const url of gameSites) {
-        const iconUrl = `${url[0]}/static/icon.png`;
+        const iconUrl = `${url[0].replace('/index.html', '')}/static/icon.png`;
         const name = url[1];
 
         if (iconUrl) {
