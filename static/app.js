@@ -2,6 +2,7 @@ const gameSites = [
     ["https://ppspps824.github.io/apps/maze/index.html", "maze"],
     ["https://ppspps824.github.io/apps/fruits_catch/index.html", "fruits_catch"],
     ["https://ppspps824.github.io/apps/math/index.html", "math"],
+    ["https://ppspps824.github.io/apps/debug/index.html", "debug"],
 ];
 
 function loadGameSites() {
