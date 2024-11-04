@@ -3,7 +3,7 @@ import random
 
 import pyxel
 
-time_limit = 2 * 30
+time_limit = 60 * 30
 
 
 class App:
