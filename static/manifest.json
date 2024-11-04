@@ -1,18 +1,20 @@
 {
-    "name": "Game Base",
-    "short_name": "Game Base",
-    "description": "This is Game Base",
+    "short_name": "リンク集",
+    "name": "ゲームリンク集",
     "icons": [
         {
-            "src": "./icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png"
+            "src": "images/icon-192x192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "images/icon-512x512.png",
+            "type": "image/png",
+            "sizes": "512x512"
         }
     ],
     "start_url": "/index.html",
     "display": "standalone",
-    "orientation": "portrait",
-    "scope": "/",
-    "theme_color": "#000",
-    "background_color": "#000"
+    "background_color": "#ffffff",
+    "theme_color": "#000000"
 }
