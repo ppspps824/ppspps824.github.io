@@ -1,175 +1,187 @@
 import json
+import random
 
 import pyxel
-
-GAME_DURATION = 30 * 20
 
 
 class App:
     def __init__(self):
+        self.WIDTH = 160
+        self.HEIGHT = 120
+        self.CELL_SIZE = 8
+        self.COLS = self.WIDTH // self.CELL_SIZE
+        self.ROWS = self.HEIGHT // self.CELL_SIZE
 
-        pyxel.init(160, 120, title="Fruits Catch")
-        pyxel.load("assets/my_resource.pyxres")  # リソースファイルの読み込み
+        pyxel.init(self.WIDTH, self.HEIGHT, title="Maze Game")
+        self.game_state = "playing"  # "playing" または "gameover"
+        self.time_limit = 30 * 30  # 30秒（30フレーム/秒）
+        self.cleared_count = 0
 
         with open(f"assets/music.json", "rt", encoding="utf-8") as fin:
             self.music = json.loads(fin.read())
 
-        pyxel.sound(3).set(  # 果物ゲット時の効果音
+        pyxel.sound(3).set(  #
             "e3a3", "t", "7", "s", 30  # note  # tone  # volume  # effect  # speed
         )
-
-        pyxel.sound(4).set("c3e3g3c4", "t", "7", "s", 20)  # 星取得時の効果音
-
-        # フルーツの種類を定義
-        self.FRUIT_TYPES = {
-            "strawberry": {"score": 30, "img_u": 0, "img_v": 0},
-            "apple": {"score": 50, "img_u": 8, "img_v": 0},
-            "banana": {"score": 20, "img_u": 0, "img_v": 8},
-            "star": {"score": 0, "img_u": 8, "img_v": 8},  # 星を追加
-        }
-
-        self.init_set()
-
-        self.add_fruit(2)
+        self.reset_game()
         pyxel.run(self.update, self.draw)
 
-    def init_set(self):
-        self.GAME_DURATION = GAME_DURATION
-        self.player_x = 80
-        self.player_y = 60
-        self.fruits = []
-        self.score = 0
-        self.game_over = False
-        self.start_time = pyxel.frame_count
+    def reset_game(self):
+        # 迷路の生成
+        self.maze = self.generate_maze()
 
-        # BGMを再生（ループ設定）
-        # 再生
+        # プレイヤーの初期位置（スコア表示エリアの直下に変更）
+        self.player_x = 8  # スコア表示エリアの幅
+        self.player_y = 4  # スコア表示エリアの高さ
+
+        # ゴールの位置を設定
+        self.goal_x = self.COLS - 2
+        self.goal_y = self.ROWS - 2
+        # ゴール地点を通路にする
+        self.maze[self.goal_y][self.goal_x] = 0
+
         if pyxel.play_pos(0) is None:
             for ch, sound in enumerate(self.music):
                 pyxel.sound(ch).set(*sound)
                 pyxel.play(ch, ch, loop=True)
 
-        # 最初の果物を追加
-        self.add_fruit(2)
+    def generate_maze(self):
+        # 迷路の初期化（壁で埋める）
+        maze = [[1 for x in range(self.COLS)] for y in range(self.ROWS)]
 
-    def add_fruit(self, num=1):
-        import random
+        # スコア表示エリアを空白にする（左上の領域）
+        score_area_width = 8  # 64ピクセル分（8セル）
+        score_area_height = 4  # 32ピクセル分（4セル）
+        for y in range(score_area_height):
+            for x in range(score_area_width):
+                maze[y][x] = 1  # この領域は壁として確保
 
-        for _ in range(num):
-            # フルーツの種類をランダムに選択（星は出現確率を低くする）
-            fruit_type = random.choices(
-                list(self.FRUIT_TYPES.keys()),
-                weights=[30, 30, 30, 10],  # apple, strawberry, banana, starの出現確率
-                k=1,
-            )[0]
+        def carve_path(x, y):
+            maze[y][x] = 0
+            directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
+            random.shuffle(directions)
 
-            # フルーツの種類によって速度を変える
-            if fruit_type == "apple":
-                speed = random.uniform(2, 4)  # りんごは速め
-            elif fruit_type == "banana":
-                speed = random.uniform(1, 2)  # バナナは遅め
-            elif fruit_type == "star":
-                speed = random.uniform(3, 5)  # 星は最も速い
-            else:  # strawberry
-                speed = random.uniform(1.5, 3)  # いちごは中間
+            for dx, dy in directions:
+                new_x, new_y = x + dx, y + dy
+                if (
+                    0 <= new_x < self.COLS
+                    and 0 <= new_y < self.ROWS
+                    and maze[new_y][new_x] == 1
+                    # スコア表示エリアを避ける
+                    and not (new_y < score_area_height and new_x < score_area_width)
+                ):
+                    maze[y + dy // 2][x + dx // 2] = 0
+                    carve_path(new_x, new_y)
 
-            self.fruits.append(
-                {
-                    "x": random.randint(0, 160),
-                    "y": 0,
-                    "speed": speed,
-                    "type": fruit_type,
-                }
-            )
+        # 迷路の生成開始（スコア表示エリアを避けた位置から）
+        start_x = score_area_width
+        start_y = score_area_height
+        carve_path(start_x, start_y)
+
+        # プレイヤーの初期位置を通路にする
+        maze[start_y][start_x] = 0
+        return maze
 
     def update(self):
-        # ゲームオーバー時は更新しない
-        if self.game_over:
-            pyxel.stop(1)  # BGMを停止
-            # マウスクリックの座標がRETRYボタンの範囲内かチェック
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                retry_x = 80 - 28  # RETRYボタンのx座標
-                retry_y = 60 + 12  # RETRYボタンのy座標
+        if self.game_state == "playing":
+            self.time_limit -= 1
+            if self.time_limit <= 0:
+                self.game_state = "gameover"
+                return
+
+            # プレイヤーの移動（押し続けに対応）
+            if pyxel.btn(pyxel.KEY_UP):
                 if (
-                    retry_x <= pyxel.mouse_x <= retry_x + 40
-                    and retry_y <= pyxel.mouse_y <= retry_y + 10
+                    self.player_y > 0
+                    and self.maze[self.player_y - 1][self.player_x] == 0
                 ):
-                    self.init_set()  # ゲームをリセット
-            return
+                    self.player_y -= 1
+            if pyxel.btn(pyxel.KEY_DOWN):
+                if (
+                    self.player_y < self.ROWS - 1
+                    and self.maze[self.player_y + 1][self.player_x] == 0
+                ):
+                    self.player_y += 1
+            if pyxel.btn(pyxel.KEY_LEFT):
+                if (
+                    self.player_x > 0
+                    and self.maze[self.player_y][self.player_x - 1] == 0
+                ):
+                    self.player_x -= 1
+            if pyxel.btn(pyxel.KEY_RIGHT):
+                if (
+                    self.player_x < self.COLS - 1
+                    and self.maze[self.player_y][self.player_x + 1] == 0
+                ):
+                    self.player_x += 1
 
-        # 残り時間の計算
-        elapsed = pyxel.frame_count - self.start_time
-        if elapsed >= self.GAME_DURATION:
-            self.game_over = True
-            return
-
-        # タッチ判定
-        if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-            touch_x = pyxel.mouse_x
-            touch_y = pyxel.mouse_y
-
-            # 各フルーツとのタッチ判定
-            for fruit in self.fruits[:]:
-                if self.check_collision(fruit, touch_x, touch_y):
-                    if fruit["type"] == "star":
-                        self.GAME_DURATION += 30 * 5  # 5秒追加
-                        pyxel.play(0, 4)
-                    else:
-                        self.score += self.FRUIT_TYPES[fruit["type"]]["score"]
-                        pyxel.play(0, 3)
-
-                    self.fruits.remove(fruit)
-                    self.add_fruit()
-
-        # フルーツの更新
-        for fruit in self.fruits[:]:
-            fruit["y"] += fruit["speed"]
-            if fruit["y"] > 120:  # 画面外に出たら消える
-                self.fruits.remove(fruit)
-                self.add_fruit()
-
-    def check_collision(self, fruit, touch_x, touch_y):
-        # タッチ位置とフルーツの距離を計算
-        dx = fruit["x"] - touch_x
-        dy = fruit["y"] - touch_y
-        return (dx * dx + dy * dy) < 90  # 8 * 8 (フルーツのサイズに応じて調整)
+            # ゴールに到達したかチェック
+            if self.player_x == self.goal_x and self.player_y == self.goal_y:
+                pyxel.play(3, 3)  # 効果音を再生
+                self.cleared_count += 1
+                self.reset_game()
+        else:
+            # ゲームオーバー時にエンターキーでリスタート
+            if pyxel.btnp(pyxel.KEY_RETURN):
+                self.game_state = "playing"
+                self.time_limit = 30 * 30
+                self.cleared_count = 0
+                self.reset_game()
 
     def draw(self):
         pyxel.cls(0)
-        pyxel.circb(pyxel.mouse_x + 5, pyxel.mouse_y + 5, 5, 11)
 
-        # フルーツの描画
-        for fruit in self.fruits:
-            fruit_data = self.FRUIT_TYPES[fruit["type"]]
-            pyxel.blt(
-                fruit["x"] - 4,  # 中心座標に調整
-                fruit["y"] - 4,
-                0,  # イメージバンク0
-                fruit_data["img_u"],
-                fruit_data["img_v"],
-                8,  # 幅
-                8,  # 高さ
-                0,  # 透明色（黒）
-                scale=3,
-            )
+        # 迷路の描画
+        for y in range(self.ROWS):
+            for x in range(self.COLS):
+                if self.maze[y][x] == 1:
+                    pyxel.rect(
+                        x * self.CELL_SIZE,
+                        y * self.CELL_SIZE,
+                        self.CELL_SIZE,
+                        self.CELL_SIZE,
+                        7,
+                    )
 
-        # 残り時間の表示（左上）
-        elapsed = pyxel.frame_count - self.start_time
-        remaining = max(0, (self.GAME_DURATION - elapsed) // 30)  # 秒単位に変換
-        pyxel.text(4, 4, f"TIME:{remaining}", 7)
+        # ゴールの描画（緑色）
+        pyxel.rect(
+            self.goal_x * self.CELL_SIZE,
+            self.goal_y * self.CELL_SIZE,
+            self.CELL_SIZE,
+            self.CELL_SIZE,
+            11,
+        )
 
-        # スコアの表示（右上）
-        score_text = str(self.score)
-        x = 160 - len(score_text) * 4 - 4
-        pyxel.text(x, 4, score_text, 7)
+        # プレイヤーの描画
+        pyxel.rect(
+            self.player_x * self.CELL_SIZE,
+            self.player_y * self.CELL_SIZE,
+            self.CELL_SIZE,
+            self.CELL_SIZE,
+            8,
+        )
+
+        # 残り時間とクリア数の表示（背景付き）
+        remaining_seconds = self.time_limit // 30
+        # 時間表示の背景
+        pyxel.rect(2, 2, 50, 22, 1)
+        pyxel.text(4, 4, f"TIME: {remaining_seconds:2d}", 7)
+        pyxel.text(4, 12, f"CLEARED: {self.cleared_count}", 7)
 
         # ゲームオーバー画面
-        if self.game_over:
-            center_x = 80 - 20  # 画面中央
-            center_y = 60 - 8
-            pyxel.text(center_x, center_y, "GAME OVER", 8)
-            pyxel.text(center_x - 8, center_y + 10, "SCORE:" + str(self.score), 7)
-            pyxel.text(center_x - 8, center_y + 20, "RETRY", 7)
+        if self.game_state == "gameover":
+            pyxel.stop(1)  # BGMを停止
+            # 半透明の黒背景（画面全体を暗く）
+            for y in range(self.HEIGHT):
+                for x in range(self.WIDTH):
+                    if (x + y) % 2 == 0:  # ディザリングパターン
+                        pyxel.pset(x, y, 0)
+
+            # 結果表示の背景
+            pyxel.rect(30, 45, 100, 35, 1)
+            pyxel.text(60, 50, "GAME OVER", 8)
+            pyxel.text(40, 60, f"Cleared Maps: {self.cleared_count}", 7)
+            pyxel.text(35, 70, "Press ENTER to restart", 7)
 
 
 App()
