@@ -1,6 +1,6 @@
 const gameSites = [
-    "https://example-game1.com",
-    "https://example-game2.com"
+    "https://ppspps824.github.io/apps/maze/index.html",
+    "https://ppspps824.github.io/apps/fruits_catch/index.html",
 ];
 
 async function fetchGameSiteData(url) {
