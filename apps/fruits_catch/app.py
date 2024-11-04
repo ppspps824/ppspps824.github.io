@@ -28,6 +28,11 @@ class App:
             "star": {"score": 0, "img_u": 8, "img_v": 8},  # 星を追加
         }
 
+        # プレイヤーの初期設定を追加
+        self.PLAYER_SPEED = 4  # プレイヤーの移動速度
+        self.PLAYER_WIDTH = 16  # プレイヤーの幅
+        self.PLAYER_HEIGHT = 16  # プレイヤーの高さ
+
         self.init_set()
 
         self.add_fruit(2)
@@ -35,8 +40,8 @@ class App:
 
     def init_set(self):
         self.GAME_DURATION = GAME_DURATION
-        self.player_x = 80
-        self.player_y = 60
+        self.player_x = 80  # プレイヤーの初期X座標
+        self.player_y = 100  # プレイヤーのY座標を固定
         self.fruits = []
         self.score = 0
         self.game_over = False
@@ -103,23 +108,26 @@ class App:
             self.game_over = True
             return
 
-        # タッチ判定
-        if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-            touch_x = pyxel.mouse_x
-            touch_y = pyxel.mouse_y
+        # プレイヤーの移動処理
+        if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
+            self.player_x = max(0, self.player_x - self.PLAYER_SPEED)
+        if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):
+            self.player_x = min(
+                160 - self.PLAYER_WIDTH, self.player_x + self.PLAYER_SPEED
+            )
 
-            # 各フルーツとのタッチ判定
-            for fruit in self.fruits[:]:
-                if self.check_collision(fruit, touch_x, touch_y):
-                    if fruit["type"] == "star":
-                        self.GAME_DURATION += 30 * 5  # 5秒追加
-                        pyxel.play(0, 4)
-                    else:
-                        self.score += self.FRUIT_TYPES[fruit["type"]]["score"]
-                        pyxel.play(0, 3)
+        # フルーツとプレイヤーの当たり判定
+        for fruit in self.fruits[:]:
+            if self.check_player_collision(fruit):
+                if fruit["type"] == "star":
+                    self.GAME_DURATION += 30 * 3  # 5秒追加
+                    pyxel.play(0, 4)
+                else:
+                    self.score += self.FRUIT_TYPES[fruit["type"]]["score"]
+                    pyxel.play(0, 3)
 
-                    self.fruits.remove(fruit)
-                    self.add_fruit()
+                self.fruits.remove(fruit)
+                self.add_fruit()
 
         # フルーツの更新
         for fruit in self.fruits[:]:
@@ -128,15 +136,21 @@ class App:
                 self.fruits.remove(fruit)
                 self.add_fruit()
 
-    def check_collision(self, fruit, touch_x, touch_y):
-        # タッチ位置とフルーツの距離を計算
-        dx = fruit["x"] - touch_x
-        dy = fruit["y"] - touch_y
-        return (dx * dx + dy * dy) < 90  # 8 * 8 (フルーツのサイズに応じて調整)
+    def check_player_collision(self, fruit):
+        # プレイヤーとフルーツの当たり判定
+        px = self.player_x + self.PLAYER_WIDTH / 2
+        py = self.player_y + self.PLAYER_HEIGHT / 2
+        fx = fruit["x"]
+        fy = fruit["y"]
+        return (px - fx) ** 2 + (py - fy) ** 2 < (self.PLAYER_WIDTH / 2 + 8) ** 2
 
     def draw(self):
         pyxel.cls(0)
-        pyxel.circb(pyxel.mouse_x + 5, pyxel.mouse_y + 5, 5, 11)
+
+        # プレイヤーの描画（四角形で表示）
+        pyxel.rect(
+            self.player_x, self.player_y, self.PLAYER_WIDTH, self.PLAYER_HEIGHT, 11
+        )
 
         # フルーツの描画
         for fruit in self.fruits:
@@ -150,7 +164,7 @@ class App:
                 8,  # 幅
                 8,  # 高さ
                 0,  # 透明色（黒）
-                scale=3,
+                scale=2,
             )
 
         # 残り時間の表示（左上）
