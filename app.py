@@ -3,6 +3,8 @@ import random
 
 import pyxel
 
+time_limit = 60 * 30
+
 
 class App:
     def __init__(self):
@@ -14,7 +16,7 @@ class App:
 
         pyxel.init(self.WIDTH, self.HEIGHT, title="Maze Game")
         self.game_state = "playing"  # "playing" または "gameover"
-        self.time_limit = 30 * 30  # 30秒（30フレーム/秒）
+        self.time_limit = time_limit
         self.cleared_count = 0
 
         with open(f"assets/music.json", "rt", encoding="utf-8") as fin:
@@ -122,9 +124,9 @@ class App:
                 self.reset_game()
         else:
             # ゲームオーバー時にエンターキーでリスタート
-            if pyxel.btnp(pyxel.KEY_RETURN):
+            if pyxel.btnp(pyxel.KEY_RETURN) or pyxel.btnp(pyxel.KEY_SPACE):
                 self.game_state = "playing"
-                self.time_limit = 30 * 30
+                self.time_limit = time_limit
                 self.cleared_count = 0
                 self.reset_game()
 
