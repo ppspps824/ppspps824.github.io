@@ -50,8 +50,8 @@ class App:
         if pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             self.selected_choice = (self.selected_choice + 1) % 4
 
-        # 決定（エンターキーまたはゲームパッドのAボタン）
-        if pyxel.btnp(pyxel.KEY_RETURN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
+        # 決定
+        if pyxel.btnp(pyxel.KEY_KP_ENTER) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
             if self.choices[self.selected_choice] == self.correct_answer:
                 self.score += 100  # 正解でスコア加算
                 self.reset_problem()
