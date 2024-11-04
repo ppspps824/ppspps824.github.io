@@ -16,32 +16,15 @@ function loadGameSites() {
         linkElement.href = "#";
         linkElement.classList.add("game-link");
         linkElement.innerHTML = `
-          <img src="${iconUrl}" alt="${name} icon" />
+            <a href="${url[0]}" target="_blank" class="game-link-direct">
+                <img src="${iconUrl}" alt="ゲームアイコン" class="game-icon" />
+            </a>
           <span>${name}</span>
         `;
-
-        linkElement.addEventListener('click', (e) => {
-            e.preventDefault();
-            loadGame(url[0]);
-        });
-
         container.appendChild(linkElement);
     }
 }
 
-function loadGame(gameUrl) {
-    const container = document.getElementById("game-list");
-    container.innerHTML = `
-        <div class="game-container">
-            <button id="back-button">← 戻る</button>
-            <iframe src="${gameUrl}" frameborder="0" width="100%" height="400px"></iframe>
-        </div>
-    `;
-
-    document.getElementById("back-button").addEventListener('click', () => {
-        loadGameSites();
-    });
-}
 
 loadGameSites();
 
