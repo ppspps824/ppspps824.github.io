@@ -7,6 +7,8 @@ class App:
         self.last_inputs = []  # 最後に押されたボタンのリストを保持
         self.max_display = 10  # 画面に表示する最大入力履歴数
 
+        pyxel.run(self.update, self.draw)
+
     def update(self):
         # キーボード入力のチェック
         for key_name in dir(pyxel):
@@ -28,14 +30,6 @@ class App:
                 pad_value = getattr(pyxel, pad_name)
                 if pyxel.btnp(pad_value):
                     self.add_input(f"GAMEPAD: {pad_name}")
-
-        # ゲームパッドの軸入力のチェック
-        for axis_name in dir(pyxel):
-            if axis_name.startswith("GAMEPAD1_AXIS_"):
-                axis_value = getattr(pyxel, axis_name)
-                axis_pos = pyxel.gamepad(0).get_axis(axis_value)
-                if abs(axis_pos) > 0.5:  # 軸の値が0.5を超えた場合に記録
-                    self.add_input(f"AXIS: {axis_name} ({axis_pos:.2f})")
 
     def add_input(self, input_text):
         self.last_inputs.insert(0, input_text)  # リストの先頭に追加
