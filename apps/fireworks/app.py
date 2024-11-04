@@ -37,7 +37,11 @@ class App:
             )
 
     def update(self):
-        if pyxel.btnp(pyxel.KEY_RETURN) or pyxel.btnp(pyxel.KEY_KP_ENTER):
+        if (
+            pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT)
+            or pyxel.btnp(pyxel.KEY_RETURN)
+            or pyxel.btnp(pyxel.KEY_KP_ENTER)
+        ):
             self.fireworks.append(
                 {
                     "x": random.randint(10, 150),
