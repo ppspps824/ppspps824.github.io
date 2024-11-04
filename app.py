@@ -92,25 +92,25 @@ class App:
                 return
 
             # プレイヤーの移動（押し続けに対応）
-            if pyxel.btn(pyxel.KEY_UP):
+            if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
                 if (
                     self.player_y > 0
                     and self.maze[self.player_y - 1][self.player_x] == 0
                 ):
                     self.player_y -= 1
-            if pyxel.btn(pyxel.KEY_DOWN):
+            if pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
                 if (
                     self.player_y < self.ROWS - 1
                     and self.maze[self.player_y + 1][self.player_x] == 0
                 ):
                     self.player_y += 1
-            if pyxel.btn(pyxel.KEY_LEFT):
+            if pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
                 if (
                     self.player_x > 0
                     and self.maze[self.player_y][self.player_x - 1] == 0
                 ):
                     self.player_x -= 1
-            if pyxel.btn(pyxel.KEY_RIGHT):
+            if pyxel.btn(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):
                 if (
                     self.player_x < self.COLS - 1
                     and self.maze[self.player_y][self.player_x + 1] == 0
