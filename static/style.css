@@ -40,3 +40,21 @@ h1 {
 .game-link span {
     font-size: 14px;
 }
+
+.game-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#back-button {
+    margin: 10px 0;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+iframe {
+    display: block;
+    margin: 0 auto;
+}
