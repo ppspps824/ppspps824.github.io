@@ -1,35 +1,22 @@
 const gameSites = [
-    "https://ppspps824.github.io/apps/maze/index.html",
-    "https://ppspps824.github.io/apps/fruits_catch/index.html",
+    ["https://ppspps824.github.io/apps/maze/index.html", "maze"],
+    ["https://ppspps824.github.io/apps/fruits_catch/index.html", "fruits_catch"],
 ];
-
-async function fetchGameSiteData(url) {
-    try {
-        const response = await fetch(`${url}/manifest.json`);
-        const manifest = await response.json();
-
-        const iconUrl = `${url}/${manifest.icons[0].src}`;
-        const name = manifest.name || manifest.short_name;
-
-        return { name, iconUrl, link: url };
-    } catch (error) {
-        console.error("Error fetching manifest:", error);
-        return null;
-    }
-}
 
 async function loadGameSites() {
     const container = document.getElementById("game-list");
 
     for (const url of gameSites) {
-        const siteData = await fetchGameSiteData(url);
-        if (siteData) {
+        const iconUrl = `${url[0]}/static/icon.png`;
+        const name = url[1];
+
+        if (iconUrl) {
             const linkElement = document.createElement("a");
-            linkElement.href = siteData.link;
+            linkElement.href = url[0];
             linkElement.classList.add("game-link");
             linkElement.innerHTML = `
-          <img src="${siteData.iconUrl}" alt="${siteData.name} icon" />
-          <span>${siteData.name}</span>
+          <img src="${iconUrl}" alt="${name} icon" />
+          <span>${name}</span>
         `;
             container.appendChild(linkElement);
         }
