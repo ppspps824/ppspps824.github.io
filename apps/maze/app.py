@@ -126,11 +126,7 @@ class App:
                 self.reset_game()
         else:
             # ゲームオーバー時にエンターキーでリスタート
-            if (
-                pyxel.btnp(pyxel.KEY_RETURN)
-                or pyxel.btnp(pyxel.KEY_SPACE)
-                or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)
-            ):
+            if pyxel.btnp(pyxel.KEY_KP_ENTER) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
                 self.game_state = "playing"
                 self.time_limit = time_limit
                 self.cleared_count = 0

@@ -92,14 +92,8 @@ class App:
         if self.game_over:
             pyxel.stop(1)  # BGMを停止
             # マウスクリックの座標がRETRYボタンの範囲内かチェック
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                retry_x = 80 - 28  # RETRYボタンのx座標
-                retry_y = 60 + 12  # RETRYボタンのy座標
-                if (
-                    retry_x <= pyxel.mouse_x <= retry_x + 40
-                    and retry_y <= pyxel.mouse_y <= retry_y + 10
-                ):
-                    self.init_set()  # ゲームをリセット
+            if pyxel.btnp(pyxel.KEY_KP_ENTER) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
+                self.init_set()  # ゲームをリセット
             return
 
         # 残り時間の計算

@@ -34,8 +34,7 @@ class App:
 
     def update(self):
         if self.game_over:
-            # ゲームオーバー時はスペースキーでリスタート
-            if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_START):
+            if pyxel.btnp(pyxel.KEY_KP_ENTER) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
                 self.__init__()
             return
 
