@@ -1,6 +1,6 @@
 {
-    "short_name": "Links",
-    "name": "Links",
+    "short_name": "Apps",
+    "name": "Apps",
     "icons": [
         {
             "src": "static/icon-192.png",
