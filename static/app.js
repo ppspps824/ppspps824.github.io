@@ -3,8 +3,9 @@ const gameSites = [
     ["https://ppspps824.github.io/apps/fruits_catch/index.html", "フルーツキャッチ"],
     ["https://ppspps824.github.io/apps/math/index.html", "たしざん"],
     ["https://ppspps824.github.io/apps/fireworks/index.html", "はなび"],
+    ["https://ppspps824.github.io/apps/car/index.html", "くるま"],
     ["https://ppspps824.github.io/apps/debug/index.html", "debug"],
-    ["https://happy-badge.reflex.run","Happy Badge"],
+    ["https://happy-badge.reflex.run", "Happy Badge"],
 ];
 
 function loadGameSites() {
