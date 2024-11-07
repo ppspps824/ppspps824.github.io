@@ -63,7 +63,11 @@ class App:
         return car
 
     def update(self):
-        if pyxel.btnp(pyxel.KEY_RETURN):
+        if (
+            pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT)
+            or pyxel.btnp(pyxel.KEY_RETURN)
+            or pyxel.btnp(pyxel.KEY_KP_ENTER)
+        ):
             self.cars.append(self.reset_car())
             pyxel.play(0, 0)
 
