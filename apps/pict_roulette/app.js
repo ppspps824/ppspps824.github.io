@@ -26,16 +26,20 @@ let spinSpeed = 0.1; // 回転速度
 let currentIndex = 0; // 現在表示している画像のインデックス
 
 function preload() {
-    // 画像を001から030までロード
-    for (let i = 1; i <= 30; i++) {
+    // 画像を001から055までロード
+    for (let i = 1; i <= 55; i++) {
         const imageNumber = i.toString().padStart(3, '0');
         this.load.image(`image${i}`, `assets/${imageNumber}.png`);
     }
+
+    // 音声ファイルをロード
+    this.load.audio('roulette_sound', 'assets/roulette_sound.mp3');
+    this.load.audio('roulette_stop_sound', 'assets/roulette_stop_sound.mp3');
 }
 
 function create() {
-    // 画像キー配列を1から30まで生成
-    const imageKeys = Array.from({ length: 30 }, (_, i) => `image${i + 1}`);
+    // 画像キー配列を1から55まで生成
+    const imageKeys = Array.from({ length: 55 }, (_, i) => `image${i + 1}`);
     imageKeys.forEach(key => {
         const image = this.add.sprite(400, 300, key);
         image.setVisible(false);
@@ -44,18 +48,22 @@ function create() {
 
     // 最初の画像を表示
     images[0].setVisible(true);
+    this.sound.play('roulette_sound');
 
     // クリックとキーボードイベントの追加
     this.input.on('pointerdown', () => {
-        isSpinning = !isSpinning;
+        isSpinning = true;
+        this.sound.play('roulette_sound');
     });
 
     this.input.keyboard.on('keydown-ENTER', () => {
-        isSpinning = !isSpinning;
+        isSpinning = true;
+        this.sound.play('roulette_sound');
     });
 
     this.input.keyboard.on('keydown-NUMPAD_ENTER', () => {
-        isSpinning = !isSpinning;
+        isSpinning = true;
+        this.sound.play('roulette_sound');
     });
 }
 
@@ -69,5 +77,19 @@ function update() {
 
         // 次の画像を表示
         images[currentIndex].setVisible(true);
+
+        // 3秒後に停止
+        if (!this.spinTimer) {
+            // 2～4秒のランダムな時間を待つ
+            const randomTime = Phaser.Math.Between(2000, 4000);
+            this.spinTimer = this.time.delayedCall(randomTime, () => {
+                // ルーレット音を停止
+                this.sound.stopAll();
+                // ルーレット停止音再生
+                this.sound.play('roulette_stop_sound');
+                isSpinning = false;
+                this.spinTimer = null;
+            }, [], this);
+        }
     }
 }
