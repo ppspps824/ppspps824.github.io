@@ -80,8 +80,8 @@ function update() {
 
         // 3秒後に停止
         if (!this.spinTimer) {
-            // 2～4秒のランダムな時間を待つ
-            const randomTime = Phaser.Math.Between(2000, 4000);
+            // 2～3.5秒のランダムな時間を待つ
+            const randomTime = Phaser.Math.Between(2000, 3500);
             this.spinTimer = this.time.delayedCall(randomTime, () => {
                 // ルーレット音を停止
                 this.sound.stopAll();
