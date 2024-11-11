@@ -11,7 +11,9 @@ const config = {
         preload: preload,
         create: create,
         update: update
-    }
+    },
+    // 背景色を設定
+    backgroundColor: '#FFFFFF',
 };
 
 const game = new Phaser.Game(config);
