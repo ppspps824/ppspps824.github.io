@@ -5,7 +5,7 @@ const gameSites = [
     ["./apps/fireworks/index.html", "はなび"],
     ["./apps/car/index.html", "くるま"],
     ["./apps/pict_roulette/index.html", "るーれっと"],
-    ["https://qiita.com/papasim824/items/9c8f7f84c04c9b37432c", "えほん"]
+    ["https://fushigiehon-ai.fly.dev", "えほん"]
 ];
 
 function loadGameSites() {
@@ -13,7 +13,7 @@ function loadGameSites() {
     container.innerHTML = '';
 
     for (const url of gameSites) {
-        const iconUrl = `${url[0].replace('/index.html', '')}/static/icon.png`;
+        const iconUrl = `${url[0].replace('/index.html', '')}/app/static/icon-512.png`;
         const name = url[1];
 
         const linkElement = document.createElement("a");
