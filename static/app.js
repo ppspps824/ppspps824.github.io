@@ -5,7 +5,7 @@ const gameSites = [
     ["./apps/fireworks/index.html", "はなび"],
     ["./apps/car/index.html", "くるま"],
     ["./apps/pict_roulette/index.html", "るーれっと"],
-    ["https://fushigiehon-ai.fly.dev", "えほん"]
+    ["https://fushigiehon-ai.fly.dev/?akdhfauiegfiwpeufhipweufhpiweufyhiapweugrfaweipugf5864149689468=ce8670e3-404d-4929-ba7a-226cbcdd5915&iudfbweuifbwieufwepuifgipweufgiwpefu1685468=readonly", "えほん"]
 ];
 
 function loadGameSites() {
@@ -13,17 +13,21 @@ function loadGameSites() {
     container.innerHTML = '';
 
     for (const url of gameSites) {
-        const iconUrl = `${url[0].replace('/index.html', '')}/app/static/icon-512.png`;
+        let iconUrl;
+        if (url[0].includes("fushigiehon-ai.fly.dev")) {
+            iconUrl = `https://fushigiehon-ai.fly.dev/app/static/icon-512.png`;
+        } else {
+            iconUrl = `${url[0].replace('/index.html', '')}/app/static/icon-512.png`;
+        }
         const name = url[1];
 
         const linkElement = document.createElement("a");
-        linkElement.href = "#";
+        linkElement.href = url[0];
+        linkElement.target = "_blank";
         linkElement.classList.add("game-link");
         linkElement.innerHTML = `
-            <a href="${url[0]}" target="_blank" class="game-link-direct">
-                <img src="${iconUrl}" alt="ゲームアイコン" class="game-icon" />
-            </a>
-          <span>${name}</span>
+            <img src="${iconUrl}" alt="ゲームアイコン" class="game-icon" />
+            <span>${name}</span>
         `;
         container.appendChild(linkElement);
     }
