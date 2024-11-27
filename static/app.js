@@ -5,6 +5,7 @@ const gameSites = [
     ["./apps/fireworks/index.html", "はなび"],
     ["./apps/car/index.html", "くるま"],
     ["./apps/pict_roulette/index.html", "るーれっと"]
+    ["https://qiita.com/papasim824/items/9c8f7f84c04c9b37432c", "えほん"]
 ];
 
 function loadGameSites() {
